@@ -19,7 +19,17 @@ const View = (props) => {
             .catch((err) => console.log({err}));
     }, []);
 
+    const deleteArticle = (id)=> {
+        setArticles(articles.filter(article=> article.id !== +id));
+    }
+
     const handleDelete = (id) => {
+        axiosWithAuth()
+            .delete(`http://localhost:5000/api/articles/${id}`)
+            .then(resp=> {
+                deleteArticle(id)
+                setArticles(resp.data);
+            })
     }
 
     const handleEdit = (article) => {
