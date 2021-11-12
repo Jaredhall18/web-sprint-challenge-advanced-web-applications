@@ -1,13 +1,79 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from "axios";
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
+
+const initialErrors = {
+    submit: "",
+}
 
 const Login = () => {
+    const [state, setState] = useState({
+        credentials: {
+          username: "",
+          password: "",
+        },
+    });
+
+    const { push } =useHistory();
+
+   const [errors, setErrors]= useState(initialErrors);
+
+   const handleChange = (e) => {
+        setState({
+        credentials: { ...state.credentials, [e.target.name]: e.target.value },
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        login();
+    }
+    const login = () => {
+        axios
+        .post("http://localhost:5000/api/login", state.credentials)
+        .then((res) => {
+            console.log(res.data);
+            localStorage.setItem("token", res.data.token);
+            setErrors({ submit: ""})
+            push("/view");
+        })
+        .catch((err) => {
+            console.log(err.response.data);
+            setErrors({...errors, submit: "Incorrect username / password combination."})
+        });
+        
+    };
     
     return(<ComponentContainer>
         <ModalContainer>
             <h1>Welcome to Blogger Pro</h1>
             <h2>Please enter your account information.</h2>
+            <p id="error">{errors.submit}</p>
         </ModalContainer>
+        <FormGroup onSubmit={handleSubmit}>
+            <Label>
+                Username:
+                <Input
+                    id="username"
+                    type="text"
+                    name="username"
+                    value={state.credentials.username}
+                    onChange={handleChange}
+                />
+            </Label>
+            <Label>
+                Password:
+                <Input
+                    id="password"
+                    type="password"
+                    name="password"
+                    value={state.credentials.password}
+                    onChange={handleChange}
+                />
+            </Label>
+            <Button id="submit">Login</Button>
+        </FormGroup>
     </ComponentContainer>);
 }
 
